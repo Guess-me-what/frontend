@@ -2,7 +2,7 @@ import GuessMeColor from '@/styles/foundation/color'
 import styled, { CSSObject } from 'styled-components'
 
 export const ButtonWrap = styled.div<{
-  backgroundColorType: 'Main' | 'Secondary'
+  backgroundcolortype: 'Main' | 'Secondary'
   border?: boolean
   width?: number
   customStyle?: CSSObject
@@ -14,18 +14,18 @@ export const ButtonWrap = styled.div<{
 
   border-radius: 7px;
 
-  background-color: ${({ backgroundColorType }) =>
-    backgroundColorType === 'Main'
+  background-color: ${({ backgroundcolortype }) =>
+    backgroundcolortype === 'Main'
       ? GuessMeColor.Yellow200
       : GuessMeColor.Gray700};
 
-  color: ${({ backgroundColorType }) =>
-    backgroundColorType === 'Main'
+  color: ${({ backgroundcolortype }) =>
+    backgroundcolortype === 'Main'
       ? GuessMeColor.Gray800
       : GuessMeColor.Gray300};
 
-  font-family: ${({ backgroundColorType }) =>
-    backgroundColorType === 'Main'
+  font-family: ${({ backgroundcolortype }) =>
+    backgroundcolortype === 'Main'
       ? 'Pretendard-SemiBold'
       : 'Pretendard-Medium'};
 
