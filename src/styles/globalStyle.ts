@@ -6,7 +6,7 @@ import GuessMeColor from './foundation/color'
 export const GlobalStyles = createGlobalStyle`
     @font-face {
         font-family: "Pretendard-Regular";
-        src: url("/Pretendard-Regular.otf") format("opentype");
+        src: url("@/assets/font/Pretendard-Regular.otf") format("opentype");
     }
 
     @font-face {

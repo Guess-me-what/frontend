@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Layout from '@/components/common/Layout'
 import { GlobalStyles } from '@/styles/globalStyle'
+import StyledComponentsRegistry from '@/libs/registry'
+import QueryClientProvider from '@/components/common/provider/queryClientProvider'
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -16,8 +18,11 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body>
-        <GlobalStyles />
-        <Layout>{children}</Layout>
+        <StyledComponentsRegistry>
+          <QueryClientProvider>
+            <Layout>{children}</Layout>
+          </QueryClientProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   )

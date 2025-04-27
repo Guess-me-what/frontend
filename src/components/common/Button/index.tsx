@@ -17,13 +17,15 @@ const Button = ({
   customStyle,
   text,
   width,
+  onClick
 }: ButtonProps) => {
   return (
     <S.ButtonWrap
-      backgroundColorType={backgroudnColorType}
+      backgroundcolortype={backgroudnColorType}
       border={border}
       customStyle={customStyle}
       width={width}
+      onClick={onClick}
     >
       {text}
     </S.ButtonWrap>
