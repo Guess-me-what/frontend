@@ -10,13 +10,13 @@ const QuizCreateFormQ5 = () => {
   const [question, setQuestion] = useState("");
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length <= 25) {
+    if (e.target.value.length <= 50) {
       setQuestion(e.target.value);
     }
   };
 
   const goToPrev = () => {
-    router.push("/quiz/create/q4"); // Q4로 가야 맞음! (q5 → q4로 수정)
+    router.push("/quiz/create/q5");
   };
 
   const goToNext = () => {
@@ -27,12 +27,12 @@ const QuizCreateFormQ5 = () => {
     <Container>
       <Header>
         <BackButton onClick={goToPrev}>{"<"}</BackButton>
-        <UserIcon />
+        <ProfileIcon src="/icons/profileIcon.svg" alt="프로필 아이콘" />
       </Header>
 
       <ProgressBarWrapper>
         <ProgressBar>
-          <Progress width="100%" /> {/* 5/5 진행바 */}
+          <Progress width="100%" />
         </ProgressBar>
       </ProgressBarWrapper>
 
@@ -78,11 +78,10 @@ const BackButton = styled.button`
   cursor: pointer;
 `;
 
-const UserIcon = styled.div`
+const ProfileIcon = styled.img`
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background-color: ${GuessMeColor.Gray700};
+  object-fit: cover;
 `;
 
 const ProgressBarWrapper = styled.div`

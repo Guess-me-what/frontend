@@ -2,30 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
 
-const QuizCreateFormQ3 = () => {
+const QuizCreateFormQ5 = () => {
   const router = useRouter();
-  const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<"O" | "X" | null>(null);
-
-  const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length <= 25) {
-      setQuestion(e.target.value);
-    }
-  };
 
   const handleAnswerSelect = (selected: "O" | "X") => {
     setAnswer(selected);
+    setTimeout(() => {
+      router.push("/quiz/join/result");
+    }, 200);
   };
 
   const goToPrev = () => {
-    router.push("/quiz/create/q2");
-  };
-
-  const goToNext = () => {
-    router.push("/quiz/create/q4");
+    router.push("/quiz/join/q4");
   };
 
   return (
@@ -37,50 +29,45 @@ const QuizCreateFormQ3 = () => {
 
       <ProgressBarWrapper>
         <ProgressBar>
-          <Progress width="60%" />
+          <Progress width="100%" />
         </ProgressBar>
       </ProgressBarWrapper>
 
       <Content>
         <QuestionSection>
-          <QuestionTitle>Q3.</QuestionTitle>
-          <QuestionInput
-            value={question}
-            onChange={handleQuestionChange}
-            placeholder="질문을 적어주세요 (25자 이내)"
-          />
+          <QuestionTitle>Q5.</QuestionTitle>
+          <QuestionInput>나는 혼자 여행하는 걸 좋아한다</QuestionInput>
         </QuestionSection>
 
         <BottomSection>
           <AnswerSection>
-            <AnswerLabel>정답</AnswerLabel>
             <AnswerButton
               selected={answer === "O"}
-              onClick={() => handleAnswerSelect("O")}
-            >
+              onClick={() => handleAnswerSelect("O")}>
               O
             </AnswerButton>
             <AnswerButton
               selected={answer === "X"}
-              onClick={() => handleAnswerSelect("X")}
-            >
+              onClick={() => handleAnswerSelect("X")}>
               X
             </AnswerButton>
           </AnswerSection>
-
-          <BottomButtonWrapper>
-            <PrevButton onClick={goToPrev}>이전</PrevButton>
-            <NextButton onClick={goToNext}>다음 문제</NextButton>
-          </BottomButtonWrapper>
         </BottomSection>
       </Content>
     </Container>
   );
 };
 
-export default QuizCreateFormQ3;
+export default QuizCreateFormQ5;
 
+// ===== 애니메이션 =====
+const clickAnimation = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+`;
 
+// ===== 스타일 =====
 const Container = styled.div`
   min-height: 100vh;
   padding: 20px;
@@ -144,21 +131,11 @@ const QuestionTitle = styled.div`
   margin-bottom: 10px;
 `;
 
-const QuestionInput = styled.input`
+const QuestionInput = styled.div`
   width: 100%;
   background: transparent;
-  border: none;
-  border-bottom: 2px solid ${GuessMeColor.Gray600};
   color: ${GuessMeColor.White};
-  font-size: 16px;
-  padding: 8px 0;
-  &:focus {
-    outline: none;
-    border-bottom: 2px solid ${GuessMeColor.White};
-  }
-  &::placeholder {
-    color: ${GuessMeColor.Gray100};
-  }
+  font-size: 20px;
 `;
 
 const BottomSection = styled.div`
@@ -168,12 +145,6 @@ const BottomSection = styled.div`
 
 const AnswerSection = styled.div`
   margin-bottom: 20px;
-`;
-
-const AnswerLabel = styled.div`
-  color: ${GuessMeColor.White};
-  font-weight: bold;
-  margin-bottom: 16px;
 `;
 
 const AnswerButton = styled.button<{ selected: boolean }>`
@@ -189,32 +160,5 @@ const AnswerButton = styled.button<{ selected: boolean }>`
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
-`;
-
-const BottomButtonWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const PrevButton = styled.button`
-  flex: 1;
-  background-color: ${GuessMeColor.Gray700};
-  color: ${GuessMeColor.Gray300};
-  font-size: 16px;
-  padding: 12px 0;
-  margin-right: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-`;
-
-const NextButton = styled.button`
-  flex: 2;
-  background-color: ${GuessMeColor.Yellow200};
-  color: ${GuessMeColor.Gray900};
-  font-size: 16px;
-  padding: 12px 0;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  animation: ${({ selected }) => (selected ? clickAnimation : "none")} 0.2s;
 `;

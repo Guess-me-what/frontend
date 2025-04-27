@@ -32,7 +32,7 @@ const QuizCreateFormQ5 = () => {
     <Container>
       <Header>
         <BackButton onClick={goToPrev}>{"<"}</BackButton>
-        <UserIcon />
+        <ProfileIcon src="/icons/profileIcon.svg" alt="프로필 아이콘" />
       </Header>
 
       <ProgressBarWrapper>
@@ -68,7 +68,7 @@ const QuizCreateFormQ5 = () => {
 
           <BottomButtonWrapper>
             <PrevButton onClick={goToPrev}>이전</PrevButton>
-            <NextButton onClick={goToNext}>다음 문제</NextButton>
+            <NextButton onClick={goToNext}>완료</NextButton>
           </BottomButtonWrapper>
         </BottomSection>
       </Content>
@@ -77,8 +77,6 @@ const QuizCreateFormQ5 = () => {
 };
 
 export default QuizCreateFormQ5;
-
-// ===== 스타일 =====
 
 const Container = styled.div`
   min-height: 100vh;
@@ -99,11 +97,12 @@ const BackButton = styled.button`
   cursor: pointer;
 `;
 
-const UserIcon = styled.div`
+const ProfileIcon = styled.img`
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background-color: ${GuessMeColor.Gray700};
+  object-fit: cover;
 `;
 
 const ProgressBarWrapper = styled.div`
@@ -155,7 +154,7 @@ const QuestionInput = styled.input`
     border-bottom: 2px solid ${GuessMeColor.White};
   }
   &::placeholder {
-    color: ${GuessMeColor.Gray400};
+    color: ${GuessMeColor.Gray100};
   }
 `;
 
@@ -189,7 +188,6 @@ const AnswerButton = styled.button<{ selected: boolean }>`
   transition: background-color 0.3s, color 0.3s;
 `;
 
-
 const BottomButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
@@ -198,7 +196,7 @@ const BottomButtonWrapper = styled.div`
 const PrevButton = styled.button`
   flex: 1;
   background-color: ${GuessMeColor.Gray700};
-  color: ${GuessMeColor.Gray400};
+  color: ${GuessMeColor.Gray300};
   font-size: 16px;
   padding: 12px 0;
   margin-right: 10px;
