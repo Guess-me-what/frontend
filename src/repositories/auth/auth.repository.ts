@@ -6,6 +6,10 @@ class AuthRepository {
   public async signup(data: AuthType) {
     await axios.post(`${CONFIG.SERVER}/auth/signup`, data)
   }
+
+  public async signin(data: Omit<AuthType, 'nickname'>) {
+    await axios.post(`${CONFIG.SERVER}/auth/signin`, data)
+  }
 }
 
 const authRepository = new AuthRepository()

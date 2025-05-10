@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 export const InputWrap = styled.div`
   width: 100%;
-  height: 15%;
+  height: 20%;
 
   display: flex;
   flex-direction: column;
@@ -41,4 +41,3 @@ export const InputContainer = styled.input`
     outline: 1px solid ${GuessMeColor.Gray700};
   }
 `
-

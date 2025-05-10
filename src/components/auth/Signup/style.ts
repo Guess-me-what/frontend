@@ -10,20 +10,23 @@ export const SignupWrap = styled.div`
 
   justify-content: flex-end;
   align-items: flex-start;
+  gap: 30px;
 `
 
 export const SignupContainer = styled.div`
   width: 100%;
-  height: 90%;
+  height: 80%;
 
   display: flex;
   flex-direction: column;
 
   justify-content: center;
   align-items: center;
+  align-self: flex-end;
 `
 
 export const SignupTitle = styled.h1`
+  height: fit-content;
   font-family: 'Pretendard-Bold';
   font-size: 22px;
 
@@ -33,7 +36,7 @@ export const SignupTitle = styled.h1`
 
 export const SignupForm = styled.div`
   width: 100%;
-  height: 90%;
+  height: 70%;
 
   display: flex;
   flex-direction: column;
