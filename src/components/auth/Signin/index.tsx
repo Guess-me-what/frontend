@@ -29,13 +29,13 @@ const Signin = () => {
           />
           <Input
             type='password'
-            value={auth.authData.email}
+            value={auth.signinData.password}
             name='password'
             id='password'
             label='비밀번호'
             placeholder='8자 이상'
             onChange={auth.handleSigninChange}
-            onKeyDown={'password'}
+            onKeyDown={''}
           />
         </S.SignupForm>
       </S.SignupContainer>

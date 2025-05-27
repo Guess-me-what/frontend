@@ -1,6 +1,7 @@
 import { useSigninMutation, useSignupMutation } from '@/queries/auth/auth.query'
 import { AuthType } from '@/types/auth/auth.type'
 import { AxiosError } from 'axios'
+import { useRouter } from 'next/navigation'
 import React, { ChangeEvent, useCallback, useState } from 'react'
 
 export const useAuth = () => {
@@ -14,6 +15,8 @@ export const useAuth = () => {
     password: '',
   })
 
+  const router = useRouter()
+
   const handleSigninChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target
@@ -21,6 +24,8 @@ export const useAuth = () => {
         ...prev,
         [name]: value,
       }))
+
+      console.log(signinData)
     },
     [setSigninData]
   )
@@ -41,6 +46,7 @@ export const useAuth = () => {
     signupMutation.mutate(authData, {
       onSuccess: () => {
         alert('회원가입 성공')
+        router.push('/auth/signin')
       },
       onError: (error) => {
         alert((error as AxiosError).message)
@@ -53,6 +59,7 @@ export const useAuth = () => {
     signinMutation.mutate(signinData, {
       onSuccess: () => {
         alert('로그인 성공')
+        router.push('/')
       },
       onError: (error) => {
         alert((error as AxiosError).message)
