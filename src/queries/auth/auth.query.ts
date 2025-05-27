@@ -10,3 +10,12 @@ export const useSignupMutation = () => {
 
   return mutation
 }
+
+export const useSigninMutation = () => {
+  const mutation = useMutation({
+    mutationFn: (data: Omit<AuthType, 'nickname'>) =>
+      authRepository.signin(data),
+  })
+
+  return mutation
+}
