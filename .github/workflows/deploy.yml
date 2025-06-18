@@ -1,24 +1,43 @@
-name: GitHub Pages Deploy
+name: Deploy Next.js to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]  # 기본 브랜치에 맞게 바꿔주세요
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout 🛎️
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install and Build 🔧
-        run: |
-          npm install
-          npm build && touch ./out/.nojekyll
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      - name: Deploy 🚀
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build & Export
+        env:
+          NODE_ENV: production
+        run: |
+          npm run build
+          npm run export
+
+      - name: Prevent Jekyll build
+        run: touch out/.nojekyll
+
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages
+          branch: gh-pages 
           folder: out
+          git_commit_message: "🚀 Deploy Next.js to GitHub Pages"
+          clean: true
+          token: ${{ secrets.GITHUB_TOKEN }}

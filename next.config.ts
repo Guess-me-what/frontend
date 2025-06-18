@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+// next.config.js
+const isProd = process.env.NODE_ENV === 'production';
+const repoName = 'frontend'; 
 
-const nextConfig: NextConfig = {
-  /* config options here */
+module.exports = {
+  output: 'export',
+  basePath: isProd ? `/${repoName}` : '',
+  assetPrefix: isProd ? `/${repoName}/` : '',
 };
-
-export default nextConfig;
