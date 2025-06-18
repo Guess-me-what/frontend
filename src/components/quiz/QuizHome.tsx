@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { useQuizStore } from "@/store/quiz";
 
 const QuizHome = () => {
   const router = useRouter();
+  const { nickname } = useQuizStore();
 
   const handleCreateQuiz = () => {
     router.push("/quiz/create/q1");
@@ -22,7 +24,7 @@ const QuizHome = () => {
       </Header>
 
       <Content>
-        <WelcomeText>반가워요, USER 님!</WelcomeText>
+        <WelcomeText>반가워요, {nickname} 님!</WelcomeText>
         <InstructionText>사용할 서비스를 선택해 주세요</InstructionText>
 
         <ButtonGroup>
@@ -45,10 +47,6 @@ const QuizHome = () => {
   );
 };
 
-export default QuizHome;
-
-// ================== 스타일 ==================
-
 const Container = styled.div`
   min-height: 100vh;
   padding: 20px;
@@ -56,7 +54,8 @@ const Container = styled.div`
 
 const Header = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const ProfileIcon = styled.img`
@@ -115,3 +114,5 @@ const ButtonText = styled.div`
   font-weight: bold;
   text-align: center;
 `;
+
+export default QuizHome;

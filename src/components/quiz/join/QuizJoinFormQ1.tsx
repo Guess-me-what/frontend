@@ -4,15 +4,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled, { keyframes } from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { useQuizStore } from "@/store/quiz";
+import { QuizQuestion } from "@/store/quiz";
 
-const QuizCreateFormQ1 = () => {
+interface Props {
+  question: QuizQuestion;
+}
+
+const QuizJoinFormQ1 = ({ question }: Props) => {
   const router = useRouter();
   const [answer, setAnswer] = useState<"O" | "X" | null>(null);
+  const { setParticipantAnswer } = useQuizStore();
 
   const handleAnswerSelect = (selected: "O" | "X") => {
     setAnswer(selected);
+    setParticipantAnswer(0, selected === "O");
     setTimeout(() => {
-      router.push("/quiz/join/q2"); // 0.2초 후 페이지 이동
+      router.push("/quiz/join/q2");
     }, 200);
   };
 
@@ -36,7 +44,7 @@ const QuizCreateFormQ1 = () => {
       <Content>
         <QuestionSection>
           <QuestionTitle>Q1.</QuestionTitle>
-          <QuestionInput>남녀 사이의 친구는 존재한다</QuestionInput>
+          <QuestionInput>{question.question}</QuestionInput>
         </QuestionSection>
 
         <BottomSection>
@@ -58,7 +66,7 @@ const QuizCreateFormQ1 = () => {
   );
 };
 
-export default QuizCreateFormQ1;
+export default QuizJoinFormQ1;
 
 // ===== 스타일 =====
 

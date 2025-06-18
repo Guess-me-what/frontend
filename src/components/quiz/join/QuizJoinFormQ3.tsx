@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import styled, { keyframes } from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { QuizQuestion } from "@/store/quiz";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import styled, { keyframes } from "styled-components";
+import { useQuizStore } from "@/store/quiz";
 
-const QuizCreateFormQ3 = () => {
+interface QuizJoinFormQ3Props {
+  question: QuizQuestion;
+}
+
+const QuizJoinFormQ3 = ({ question }: QuizJoinFormQ3Props) => {
   const router = useRouter();
   const [answer, setAnswer] = useState<"O" | "X" | null>(null);
+  const { setParticipantAnswer } = useQuizStore();
 
   const handleAnswerSelect = (selected: "O" | "X") => {
     setAnswer(selected);
+    setParticipantAnswer(2, selected === "O");
     setTimeout(() => {
       router.push("/quiz/join/q4");
     }, 200);
@@ -36,7 +44,7 @@ const QuizCreateFormQ3 = () => {
       <Content>
         <QuestionSection>
           <QuestionTitle>Q3.</QuestionTitle>
-          <QuestionInput>나는 고양이파이다</QuestionInput>
+          <QuestionInput>{question.question}</QuestionInput>
         </QuestionSection>
 
         <BottomSection>
@@ -58,7 +66,7 @@ const QuizCreateFormQ3 = () => {
   );
 };
 
-export default QuizCreateFormQ3;
+export default QuizJoinFormQ3;
 
 // ===== 애니메이션 =====
 const clickAnimation = keyframes`

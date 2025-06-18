@@ -11,9 +11,6 @@ import ResponseHandler from './responseHandler'
 const axiosRequestConfig: AxiosRequestConfig = {
   baseURL: CONFIG.SERVER,
   withCredentials: true,
-  headers: {
-    [REQUEST_TOKEN_KEY]: `Bearer ${token.getToken(ACCESS_TOKEN_KEY)}`,
-  },
 }
 
 const guessMeWhatAxios = axios.create(axiosRequestConfig)

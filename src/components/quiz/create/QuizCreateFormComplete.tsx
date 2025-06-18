@@ -4,11 +4,21 @@ import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
 import { Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuizStore } from "@/store/quiz";
 
 const QuizCreateComplete = () => {
   const router = useRouter();
   const [copySuccess, setCopySuccess] = useState(false);
+  const { nickname, quizCode } = useQuizStore();
+
+  useEffect(() => {
+    if (!quizCode) {
+      alert('퀴즈 생성에 실패했습니다. 다시 시도해주세요.');
+      router.push('/quiz/create/bonus');
+      return;
+    }
+  }, [quizCode, router]);
 
   const handleGoHome = () => {
     router.push("/quiz");
@@ -18,17 +28,20 @@ const QuizCreateComplete = () => {
     router.push("/quiz/create/bonus");
   };
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText("ABCDEFG").then(() => {
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(quizCode || '');
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
-    });
+    } catch (err) {
+      alert("코드 복사에 실패했습니다.");
+    }
   };
 
   return (
     <Container>
       <TopMessage>
-        <HighlightText>USER 님의 테스트를</HighlightText>
+        <HighlightText>{nickname}님의 테스트를</HighlightText>
         <HighlightText>성공적으로 만들었어요!</HighlightText>
       </TopMessage>
 
@@ -37,18 +50,20 @@ const QuizCreateComplete = () => {
 
         <CardContent>
           <SubTitle>회원님의 테스트</SubTitle>
-          <Title>USER 님의 테스트</Title>
+          <Title>{nickname}님의 테스트</Title>
 
           <ShareSection>
             <ShareLabel>공유 코드</ShareLabel>
             <CodeWithIcon>
-              <ShareCode>ABCDEFG</ShareCode>
-              <CopyIcon onClick={handleCopyCode} />
+              <ShareCode>{quizCode || ''}</ShareCode>
+              <CopyIcon onClick={handleCopyCode}>
+                <Copy size={20} color={GuessMeColor.Gray400} />
+              </CopyIcon>
             </CodeWithIcon>
           </ShareSection>
 
           {copySuccess && (
-            <SnsShareMessage>SNS에 공유해보세요!</SnsShareMessage>
+            <CopySuccessMessage>코드가 복사되었습니다!</CopySuccessMessage>
           )}
 
           <ExpireDate>유효 기간: 2025.12.30</ExpireDate>
@@ -89,97 +104,85 @@ const HighlightText = styled.div`
 
 const Card = styled.div`
   width: 100%;
-  background-color: ${GuessMeColor.Yellow200};
+  background-color: ${GuessMeColor.Gray700};
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  margin-bottom: 40px;
-  display: flex;
+  padding: 24px;
+  position: relative;
 `;
 
 const ProfileCircle = styled.div`
-  width: 60px;
-  height: 60px;
-  background-color: black;
+  width: 48px;
+  height: 48px;
+  background-color: ${GuessMeColor.Gray500};
   border-radius: 50%;
-  flex-shrink: 0;
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const CardContent = styled.div`
-  margin-left: 16px;
-  flex: 1;
+  margin-top: 32px;
 `;
 
 const SubTitle = styled.div`
-  font-size: 12px;
-  color: ${GuessMeColor.Gray700};
+  color: ${GuessMeColor.Gray400};
+  font-size: 14px;
+  margin-bottom: 4px;
 `;
 
 const Title = styled.div`
-  font-size: 18px;
-  font-weight: bold;
-  color: ${GuessMeColor.Gray900};
-  margin: 4px 0 16px;
+  color: ${GuessMeColor.White};
+  font-size: 20px;
+  margin-bottom: 24px;
 `;
 
 const ShareSection = styled.div`
-  display: flex;
-  align-items: center;
   margin-bottom: 8px;
 `;
 
 const ShareLabel = styled.div`
-  background-color: ${GuessMeColor.Yellow100};
-  color: ${GuessMeColor.Gray900};
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 8px;
-  margin-right: 8px;
+  color: ${GuessMeColor.Gray400};
+  font-size: 14px;
+  margin-bottom: 8px;
 `;
 
 const CodeWithIcon = styled.div`
   display: flex;
   align-items: center;
+  gap: 8px;
 `;
 
 const ShareCode = styled.div`
-  font-size: 18px;
+  color: ${GuessMeColor.White};
+  font-size: 24px;
   font-weight: bold;
-  color: ${GuessMeColor.Gray900};
 `;
 
-const CopyIcon = styled(Copy)`
-  width: 20px;
-  height: 20px;
-  margin-left: 8px;
-  color: ${GuessMeColor.Gray900};
+const CopyIcon = styled.button`
+  background: none;
+  border: none;
+  padding: 4px;
   cursor: pointer;
-`;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-const SnsShareMessage = styled.div`
-  font-size: 12px;
-  background-color: ${GuessMeColor.Yellow200};
-  color: ${GuessMeColor.Gray900};
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 8px;
-  margin-top: 8px;
-  animation: fadeIn 0.3s ease-in-out;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  &:hover {
+    opacity: 0.8;
   }
 `;
 
-const ExpireDate = styled.div`
-  font-size: 12px;
-  color: ${GuessMeColor.Gray700};
+const CopySuccessMessage = styled.div`
+  color: ${GuessMeColor.Yellow200};
+  font-size: 14px;
   margin-top: 8px;
+`;
+
+const ExpireDate = styled.div`
+  color: ${GuessMeColor.Gray400};
+  font-size: 14px;
+  margin-top: 24px;
 `;
 
 const ButtonWrapper = styled.div`
@@ -192,9 +195,10 @@ const ButtonWrapper = styled.div`
 const PrevButton = styled.button`
   flex: 1;
   background-color: ${GuessMeColor.Gray700};
-  color: ${GuessMeColor.Gray400};
+  color: ${GuessMeColor.Gray300};
   font-size: 16px;
-  padding: 14px 0;
+  padding: 12px 0;
+  margin-right: 10px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -205,7 +209,7 @@ const MainButton = styled.button`
   background-color: ${GuessMeColor.Yellow200};
   color: ${GuessMeColor.Gray900};
   font-size: 16px;
-  padding: 14px 0;
+  padding: 12px 0;
   border: none;
   border-radius: 8px;
   cursor: pointer;

@@ -4,16 +4,60 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled, { keyframes } from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { useQuizStore } from "@/store/quiz";
+import { QuizQuestion } from "@/store/quiz";
+import guessMeWhatAxios from "@/libs/axios/customAxios";
 
-const QuizCreateFormQ5 = () => {
+interface QuizJoinFormQ5Props {
+  question: QuizQuestion;
+}
+
+const QuizJoinFormQ5 = ({ question }: QuizJoinFormQ5Props) => {
   const router = useRouter();
   const [answer, setAnswer] = useState<"O" | "X" | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setParticipantAnswer, participantAnswers, quizCode, participantNickname } = useQuizStore();
 
-  const handleAnswerSelect = (selected: "O" | "X") => {
+  const handleAnswerSelect = async (selected: "O" | "X") => {
+    if (isSubmitting) return;
+    
     setAnswer(selected);
-    setTimeout(() => {
-      router.push("/quiz/join/result");
-    }, 200);
+    setParticipantAnswer(4, selected === "O");
+    setIsSubmitting(true);
+
+    try {
+      // null 값을 제외한 실제 답변만 필터링
+      const validAnswers = participantAnswers
+        .map((answer, index) => ({
+          number: index + 1,
+          answer: answer === null ? null : answer ? "O" : "X",
+        }))
+        .filter(item => item.answer !== null);
+
+      console.log("제출 데이터:", {
+        quizCode,
+        nickname: participantNickname,
+        answers: validAnswers
+      });
+
+      // 답변 제출
+      const response = await guessMeWhatAxios.post(`/quiz/${quizCode}/submit`, {
+        nickname: participantNickname,
+        answers: validAnswers,
+      });
+
+      console.log("제출 응답:", response.data);
+
+      if (response.data.status === 200) {
+        console.log("제출 성공, 결과 페이지로 이동");
+        // 제출 성공 시 결과 페이지로 이동
+        router.push("/quiz/join/result");
+      }
+    } catch (error) {
+      console.error("답변 제출 실패:", error);
+      alert("답변 제출에 실패했습니다. 다시 시도해주세요.");
+      setIsSubmitting(false);
+    }
   };
 
   const goToPrev = () => {
@@ -36,20 +80,22 @@ const QuizCreateFormQ5 = () => {
       <Content>
         <QuestionSection>
           <QuestionTitle>Q5.</QuestionTitle>
-          <QuestionInput>나는 혼자 여행하는 걸 좋아한다</QuestionInput>
+          <QuestionInput>{question.question}</QuestionInput>
         </QuestionSection>
 
         <BottomSection>
           <AnswerSection>
             <AnswerButton
               selected={answer === "O"}
-              onClick={() => handleAnswerSelect("O")}>
-              O
+              onClick={() => handleAnswerSelect("O")}
+              disabled={isSubmitting}>
+              {isSubmitting ? "제출 중..." : "O"}
             </AnswerButton>
             <AnswerButton
               selected={answer === "X"}
-              onClick={() => handleAnswerSelect("X")}>
-              X
+              onClick={() => handleAnswerSelect("X")}
+              disabled={isSubmitting}>
+              {isSubmitting ? "제출 중..." : "X"}
             </AnswerButton>
           </AnswerSection>
         </BottomSection>
@@ -58,7 +104,7 @@ const QuizCreateFormQ5 = () => {
   );
 };
 
-export default QuizCreateFormQ5;
+export default QuizJoinFormQ5;
 
 // ===== 애니메이션 =====
 const clickAnimation = keyframes`
@@ -161,4 +207,9 @@ const AnswerButton = styled.button<{ selected: boolean }>`
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
   animation: ${({ selected }) => (selected ? clickAnimation : "none")} 0.2s;
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
+

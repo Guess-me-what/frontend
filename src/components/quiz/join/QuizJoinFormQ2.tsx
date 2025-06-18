@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import styled, { keyframes } from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { QuizQuestion } from "@/store/quiz";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import styled, { keyframes } from "styled-components";
+import { useQuizStore } from "@/store/quiz";
 
-const QuizCreateFormQ2 = () => {
+interface QuizJoinFormQ2Props {
+  question: QuizQuestion;
+}
+
+const QuizJoinFormQ2 = ({ question }: QuizJoinFormQ2Props) => {
   const router = useRouter();
   const [answer, setAnswer] = useState<"O" | "X" | null>(null);
+  const { setParticipantAnswer } = useQuizStore();
 
   const handleAnswerSelect = (selected: "O" | "X") => {
     setAnswer(selected);
+    setParticipantAnswer(1, selected === "O");
     setTimeout(() => {
       router.push("/quiz/join/q3");
     }, 200);
@@ -36,21 +44,19 @@ const QuizCreateFormQ2 = () => {
       <Content>
         <QuestionSection>
           <QuestionTitle>Q2.</QuestionTitle>
-          <QuestionInput>나는 MBTI를 믿는다</QuestionInput>
+          <QuestionInput>{question.question}</QuestionInput>
         </QuestionSection>
 
         <BottomSection>
           <AnswerSection>
             <AnswerButton
               selected={answer === "O"}
-              onClick={() => handleAnswerSelect("O")}
-            >
+              onClick={() => handleAnswerSelect("O")}>
               O
             </AnswerButton>
             <AnswerButton
               selected={answer === "X"}
-              onClick={() => handleAnswerSelect("X")}
-            >
+              onClick={() => handleAnswerSelect("X")}>
               X
             </AnswerButton>
           </AnswerSection>
@@ -60,11 +66,16 @@ const QuizCreateFormQ2 = () => {
   );
 };
 
-export default QuizCreateFormQ2;
+export default QuizJoinFormQ2;
+
+// ===== 애니메이션 =====
+const clickAnimation = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+`;
 
 // ===== 스타일 =====
-
-
 const Container = styled.div`
   min-height: 100vh;
   padding: 20px;
@@ -144,19 +155,6 @@ const AnswerSection = styled.div`
   margin-bottom: 20px;
 `;
 
-// --- 버튼 눌림 애니메이션 ---
-const clickAnimation = keyframes`
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-`;
-
 const AnswerButton = styled.button<{ selected: boolean }>`
   width: 100%;
   background-color: ${({ selected }) =>
@@ -170,5 +168,5 @@ const AnswerButton = styled.button<{ selected: boolean }>`
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
-  animation: ${({ selected }) => (selected ? clickAnimation : "none")} 0.3s;
+  animation: ${({ selected }) => (selected ? clickAnimation : "none")} 0.2s;
 `;

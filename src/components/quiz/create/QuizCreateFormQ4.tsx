@@ -4,20 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { useQuizStore } from "@/store/quiz";
 
 const QuizCreateFormQ4 = () => {
   const router = useRouter();
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState<"O" | "X" | null>(null);
+  const { questions, setQuestion, setAnswer } = useQuizStore();
+  const [question, setLocalQuestion] = useState(questions[3].question);
+  const [answer, setLocalAnswer] = useState<'O' | 'X' | null>(
+    questions[3].answer === true ? 'O' : questions[3].answer === false ? 'X' : null
+  );
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value.length <= 25) {
-      setQuestion(e.target.value);
+      setLocalQuestion(e.target.value);
+      setQuestion(3, e.target.value);
     }
   };
 
-  const handleAnswerSelect = (selected: "O" | "X") => {
-    setAnswer(selected);
+  const handleAnswerSelect = (selected: 'O' | 'X') => {
+    setLocalAnswer(selected);
+    setAnswer(3, selected === 'O');
   };
 
   const goToPrev = () => {
@@ -25,6 +31,14 @@ const QuizCreateFormQ4 = () => {
   };
 
   const goToNext = () => {
+    if (!question.trim()) {
+      alert('질문을 입력해주세요!');
+      return;
+    }
+    if (!answer) {
+      alert('답변을 선택해주세요!');
+      return;
+    }
     router.push("/quiz/create/q5");
   };
 
@@ -47,39 +61,37 @@ const QuizCreateFormQ4 = () => {
           <QuestionInput
             value={question}
             onChange={handleQuestionChange}
-            placeholder="질문을 적어주세요 (25자 이내)"
+            placeholder="질문을 입력해주세요"
+            maxLength={25}
           />
+          <CharCount>{question.length}/25</CharCount>
         </QuestionSection>
 
-        <BottomSection>
-          <AnswerSection>
-            <AnswerLabel>정답</AnswerLabel>
-            <AnswerButton
-              selected={answer === "O"}
-              onClick={() => handleAnswerSelect("O")}
-            >
-              O
-            </AnswerButton>
-            <AnswerButton
-              selected={answer === "X"}
-              onClick={() => handleAnswerSelect("X")}
-            >
-              X
-            </AnswerButton>
-          </AnswerSection>
-
-          <BottomButtonWrapper>
-            <PrevButton onClick={goToPrev}>이전</PrevButton>
-            <NextButton onClick={goToNext}>다음 문제</NextButton>
-          </BottomButtonWrapper>
-        </BottomSection>
+        <AnswerSection>
+          <AnswerButton
+            selected={answer === 'O'}
+            onClick={() => handleAnswerSelect('O')}
+          >
+            O
+          </AnswerButton>
+          <AnswerButton
+            selected={answer === 'X'}
+            onClick={() => handleAnswerSelect('X')}
+          >
+            X
+          </AnswerButton>
+        </AnswerSection>
       </Content>
+
+      <ButtonWrapper>
+        <PrevButton onClick={goToPrev}>이전</PrevButton>
+        <NextButton onClick={goToNext}>다음</NextButton>
+      </ButtonWrapper>
     </Container>
   );
 };
 
 export default QuizCreateFormQ4;
-
 
 const Container = styled.div`
   min-height: 100vh;
@@ -136,6 +148,7 @@ const Content = styled.div`
 
 const QuestionSection = styled.div`
   margin-bottom: 40px;
+  position: relative;
 `;
 
 const QuestionTitle = styled.div`
@@ -161,19 +174,16 @@ const QuestionInput = styled.input`
   }
 `;
 
-const BottomSection = styled.div`
-  display: flex;
-  flex-direction: column;
+const CharCount = styled.span`
+  position: absolute;
+  right: 0;
+  bottom: -20px;
+  color: ${GuessMeColor.Gray400};
+  font-size: 12px;
 `;
 
 const AnswerSection = styled.div`
   margin-bottom: 20px;
-`;
-
-const AnswerLabel = styled.div`
-  color: ${GuessMeColor.White};
-  font-weight: bold;
-  margin-bottom: 16px;
 `;
 
 const AnswerButton = styled.button<{ selected: boolean }>`
@@ -191,7 +201,7 @@ const AnswerButton = styled.button<{ selected: boolean }>`
   transition: background-color 0.3s, color 0.3s;
 `;
 
-const BottomButtonWrapper = styled.div`
+const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 `;

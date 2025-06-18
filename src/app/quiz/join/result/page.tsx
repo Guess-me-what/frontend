@@ -1,92 +1,127 @@
 "use client";
 
-import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import styled from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
+import { useQuizStore } from "@/store/quiz";
+import customAxios from "@/libs/axios/customAxios";
 
-const QuizResult = () => {
+interface QuizResult {
+  nickname: string;
+  score: number;
+  wrongAnswers: {
+    number: number;
+    correctAnswer: "O" | "X";
+  }[];
+}
+
+const QuizJoinResultPage = () => {
   const router = useRouter();
-
-  const [temperature, setTemperature] = useState(0);
+  const { quizCode, participantNickname, participantAnswers } = useQuizStore();
+  const [result, setResult] = useState<QuizResult | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    const end = 60;
-    const duration = 3000;
-    const frameRate = 1000 / 60;
-    const totalFrames = Math.round(duration / frameRate);
-    let currentFrame = 0;
+    const fetchResult = async () => {
+      try {
+        if (!quizCode || !participantNickname || !participantAnswers) {
+          router.push("/quiz/join");
+          return;
+        }
 
-    const counter = setInterval(() => {
-      currentFrame++;
-      const progress = currentFrame / totalFrames;
-      const currentTemp = progress * end;
-      setTemperature(currentTemp);
+        const formattedAnswers = participantAnswers.map((answer, index) => ({
+          number: index + 1,
+          answer: answer ? "O" : "X"
+        }));
 
-      if (currentFrame === totalFrames) {
-        clearInterval(counter);
+        const response = await customAxios.post(`/quiz/${quizCode}/submit`, {
+          nickname: participantNickname,
+          answers: formattedAnswers
+        });
+
+        if (response.data.status === 200) {
+          setResult(response.data.data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("결과를 가져오는데 실패했습니다:", error);
+        setIsLoading(false);
       }
-    }, frameRate);
-  }, []);
+    };
 
-  const handleGoHome = () => {
+    if (quizCode) {
+      fetchResult();
+    } else {
+      console.log("필수 데이터 누락:", {
+        quizCode,
+        participantNickname,
+        participantAnswers
+      });
+      router.push("/quiz/join");
+    }
+  }, [quizCode, participantNickname, participantAnswers, router, retryCount]);
+
+  const goToHome = () => {
     router.push("/quiz");
   };
 
-  const handleGoCreate = () => {
-    router.push("/quiz/create/q1");
-  };
+  if (isLoading) {
+    return <div>결과를 불러오는 중...</div>;
+  }
+
+  if (!result) {
+    return (
+      <Container>
+        <Content>
+          <Title>결과를 불러올 수 없습니다.</Title>
+          <HomeButton onClick={goToHome}>홈으로</HomeButton>
+        </Content>
+      </Container>
+    );
+  }
 
   return (
     <Container>
       <Header>
-        <BackButton onClick={() => router.push("/quiz")}>{"<"}</BackButton>
+        <HomeButton onClick={goToHome}>홈으로</HomeButton>
+        <ProfileIcon src="/icons/profileIcon.svg" alt="프로필 아이콘" />
       </Header>
 
       <Content>
         <Title>
-          OLSM 님과 최미래 님의
+          {result.nickname}님의
           <br />
-          우정 온도는 ...
+          우정 온도는?
         </Title>
 
-        <TempWrapper>
-          <TempText left={`${temperature}%`}>
-            {Math.round(temperature)}℃
-          </TempText>
-          <ProgressBar>
-            <Progress width={`${temperature}%`} />
-          </ProgressBar>
-          <Triangle left={`${temperature}%`} />
-        </TempWrapper>
+        <TemperatureSection>
+          <TemperatureGraph>
+            <TemperatureBar temperature={result.score} />
+          </TemperatureGraph>
+          <TemperatureText>{result.score}°C</TemperatureText>
+        </TemperatureSection>
 
         <AnswerSummary>
-          <AnswerTitle>오답 내역</AnswerTitle>
-
-          <AnswerItem>
-            <Question>Q1. 남녀 사이의 친구는 존재한다</Question>
-            <Correct>정답 : O</Correct>
-          </AnswerItem>
-
-          <AnswerItem>
-            <Question>Q5. 게임을 하루에 15시간 이상 해본 적이 있다</Question>
-            <Correct>정답 : X</Correct>
-          </AnswerItem>
+          <SummaryTitle>오답 내역</SummaryTitle>
+          {result.wrongAnswers.map((wrong) => (
+            <WrongAnswerItem key={wrong.number}>
+              <QuestionNumber>Q{wrong.number}.</QuestionNumber>
+              <AnswerInfo>
+                <CorrectAnswer>정답: {wrong.correctAnswer}</CorrectAnswer>
+              </AnswerInfo>
+            </WrongAnswerItem>
+          ))}
         </AnswerSummary>
-
-        <ButtonWrapper>
-          <HomeButton onClick={handleGoHome}>홈으로</HomeButton>
-          <CreateLink onClick={handleGoCreate}>내 퀴즈 만들러 가기</CreateLink>
-        </ButtonWrapper>
       </Content>
     </Container>
   );
 };
 
-export default QuizResult;
+export default QuizJoinResultPage;
 
 // ===== 스타일 =====
-
 const Container = styled.div`
   min-height: 100vh;
   padding: 20px;
@@ -94,129 +129,104 @@ const Container = styled.div`
 
 const Header = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
 `;
 
-const BackButton = styled.button`
+const HomeButton = styled.button`
   background: none;
   border: none;
   color: ${GuessMeColor.White};
-  font-size: 24px;
+  font-size: 16px;
   cursor: pointer;
+`;
+
+const ProfileIcon = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: ${GuessMeColor.Gray700};
+  object-fit: cover;
 `;
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  margin-top: 30px;
+  align-items: center;
+  margin-top: 40px;
 `;
 
 const Title = styled.h1`
-  color: ${GuessMeColor.White};
-  font-size: 20px;
-  text-align: left;
-  line-height: 1.5;
-`;
-
-const TempWrapper = styled.div`
-  margin-top: 40px;
-  position: relative;
-  width: 100%;
-  height: 80px;
-`;
-
-const TempText = styled.div<{ left: string }>`
-  position: absolute;
-  top: 0;
-  left: ${({ left }) => left};
-  transform: translateX(-50%);
-  color: ${GuessMeColor.Yellow200};
   font-size: 24px;
-  font-weight: bold;
-  transition: left 0.3s ease;
-`;
-
-const ProgressBar = styled.div`
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-  height: 12px;
-  background-color: ${GuessMeColor.Gray700};
-  border-radius: 6px;
-  overflow: hidden;
-`;
-
-const Progress = styled.div<{ width: string }>`
-  width: ${({ width }) => width};
-  height: 100%;
-  background-color: ${GuessMeColor.Yellow200};
-  transition: width 0.3s ease;
-`;
-
-const Triangle = styled.div<{ left: string }>`
-  position: absolute;
-  top: 40px;
-  left: ${({ left }) => left};
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid ${GuessMeColor.Yellow200};
-  transition: left 0.3s ease;
-`;
-
-const AnswerSummary = styled.div`
-  margin-top: 50px;
-  width: 100%;
-`;
-
-const AnswerTitle = styled.div`
   color: ${GuessMeColor.White};
-  font-weight: bold;
-  font-size: 18px;
-  margin-bottom: 20px;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 40px;
 `;
 
-const AnswerItem = styled.div`
-  margin-bottom: 30px;
-`;
-
-const Question = styled.div`
-  color: ${GuessMeColor.White};
-  font-size: 16px;
-  margin-bottom: 8px;
-  white-space: pre-wrap;
-`;
-
-const Correct = styled.div`
-  color: ${GuessMeColor.Red};
-  font-size: 16px;
-`;
-
-const ButtonWrapper = styled.div`
-  width: 100%;
-  margin-top: 40px;
+const TemperatureSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 40px;
 `;
 
-const HomeButton = styled.button`
-  width: 100%;
-  background-color: ${GuessMeColor.Yellow200};
-  color: ${GuessMeColor.Gray900};
-  font-size: 18px;
-  padding: 14px 0;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+const TemperatureGraph = styled.div`
+  width: 200px;
+  height: 20px;
+  background-color: ${GuessMeColor.Gray700};
+  border-radius: 10px;
+  overflow: hidden;
   margin-bottom: 10px;
 `;
 
-const CreateLink = styled.div`
+const TemperatureBar = styled.div<{ temperature: number }>`
+  width: ${({ temperature }) => (temperature / 100) * 100}%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    ${GuessMeColor.Yellow200} 0%,
+    ${GuessMeColor.Yellow300} 100%
+  );
+  transition: width 1s ease-in-out;
+`;
+
+const TemperatureText = styled.div`
+  font-size: 36px;
   color: ${GuessMeColor.White};
+  font-weight: bold;
+`;
+
+const AnswerSummary = styled.div`
+  width: 100%;
+  max-width: 600px;
+`;
+
+const SummaryTitle = styled.h2`
+  font-size: 20px;
+  color: ${GuessMeColor.White};
+  margin-bottom: 20px;
+`;
+
+const WrongAnswerItem = styled.div`
+  background-color: ${GuessMeColor.Gray700};
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+`;
+
+const QuestionNumber = styled.div`
+  font-size: 16px;
+  color: ${GuessMeColor.Yellow200};
+  margin-bottom: 8px;
+`;
+
+const AnswerInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
   font-size: 14px;
-  cursor: pointer;
+`;
+
+const CorrectAnswer = styled.div`
+  color: ${GuessMeColor.Yellow200};
 `;

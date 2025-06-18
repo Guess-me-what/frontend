@@ -3,27 +3,37 @@
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
-import { ChevronLeft } from "lucide-react";
+import { useQuizStore } from "@/store/quiz";
 import { useState } from "react";
 
-const QuizCreateComplete = () => {
+const QuizJoinReadyPage = () => {
   const router = useRouter();
-  const [copySuccess, setCopySuccess] = useState(false);
+  const { quizInfo, setParticipantNickname } = useQuizStore();
+  const [nickname, setNickname] = useState("");
 
-  const handleGoTest = () => {
+  const goToPrev = () => {
+    router.push("/quiz/join");
+  };
+
+  const goToNext = () => {
+    if (!nickname.trim()) {
+      alert("닉네임을 입력해주세요!");
+      return;
+    }
+    setParticipantNickname(nickname);
     router.push("/quiz/join/q1");
   };
 
-  const handleGoJoin = () => {
+  if (!quizInfo) {
     router.push("/quiz/join");
-  };
+    return null;
+  }
 
   return (
     <Container>
       <Header>
-        <BackButton onClick={handleGoJoin}>
-          <ChevronLeft size={28} color="white" />
-        </BackButton>
+        <BackButton onClick={goToPrev}>{"<"}</BackButton>
+        <ProfileIcon src="/icons/profileIcon.svg" alt="프로필 아이콘" />
       </Header>
 
       <TopMessage>
@@ -33,54 +43,66 @@ const QuizCreateComplete = () => {
 
       <Card>
         <ProfileCircle />
-
         <CardContent>
           <SubTitle>발견한 테스트</SubTitle>
-          <Title>최미래님의 테스트</Title>
+          <Title>{quizInfo.nickname}님의 테스트</Title>
 
           <ShareSection>
             <ShareLabel>한마디</ShareLabel>
-            <ShareCode>“우정 온도 100인 친구에게 엽떡 쏜다!”</ShareCode>
+            <ShareCode>{quizInfo.introduction}</ShareCode>
           </ShareSection>
 
-          {copySuccess && (
-            <SnsShareMessage>SNS에 공유해보세요!</SnsShareMessage>
-          )}
-
-          <ExpireDate>유효 기간: 2024.04.02</ExpireDate>
+          <ExpireDate>유효 기간: {quizInfo.expireAt}</ExpireDate>
         </CardContent>
       </Card>
 
+      <NicknameInput
+        type="text"
+        placeholder="닉네임을 입력해주세요"
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+        maxLength={10}
+      />
+
       <ButtonWrapper>
-        <PrevButton onClick={handleGoJoin}>이전</PrevButton>
-        <MainButton onClick={handleGoTest}>시작하기</MainButton>
+        <PrevButton onClick={goToPrev}>이전</PrevButton>
+        <MainButton onClick={goToNext}>시작하기</MainButton>
       </ButtonWrapper>
     </Container>
   );
 };
 
-export default QuizCreateComplete;
+export default QuizJoinReadyPage;
 
 // ===== 스타일 =====
 
 const Container = styled.div`
-  min-height: 100vh;
-  padding: 24px 20px 32px;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  padding: 24px 20px 32px;
 `;
 
 const Header = styled.div`
-  height: 40px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
 `;
 
 const BackButton = styled.button`
   background: none;
   border: none;
-  padding: 0;
+  color: ${GuessMeColor.White};
+  font-size: 24px;
   cursor: pointer;
+`;
+
+const ProfileIcon = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: ${GuessMeColor.Gray700};
+  object-fit: cover;
 `;
 
 const TopMessage = styled.div`
@@ -155,20 +177,31 @@ const ShareCode = styled.div`
   color: ${GuessMeColor.Gray900};
 `;
 
-const SnsShareMessage = styled.div`
-  font-size: 12px;
-  background-color: ${GuessMeColor.Yellow200};
-  color: ${GuessMeColor.Gray900};
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 8px;
-  margin-top: 8px;
-`;
-
 const ExpireDate = styled.div`
   font-size: 12px;
   color: ${GuessMeColor.Gray700};
   margin-top: 8px;
+`;
+
+const NicknameInput = styled.input`
+  width: 100%;
+  background-color: ${GuessMeColor.Gray700};
+  color: ${GuessMeColor.White};
+  font-size: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  &::placeholder {
+    color: ${GuessMeColor.Gray400};
+  }
+
+  &:focus {
+    outline: none;
+    border: 1px solid ${GuessMeColor.Yellow200};
+  }
 `;
 
 const ButtonWrapper = styled.div`

@@ -4,17 +4,44 @@ import styled from "styled-components";
 import GuessMeColor from "@/styles/foundation/color";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuizStore } from "@/store/quiz";
+import guessMeWhatAxios from "@/libs/axios/customAxios";
 
 const QuizJoinFindPage = () => {
   const router = useRouter();
   const [code, setCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { setQuizCode, setQuizInfo, setQuizQuestions, resetParticipantAnswers } = useQuizStore();
 
-  const goToTest = () => {
+  const goToTest = async () => {
     if (code.trim() === "") {
       alert("코드를 입력해 주세요!");
       return;
     }
-    router.push("/quiz/join/ready");
+
+    setIsLoading(true);
+    try {
+      // 퀴즈 정보 가져오기
+      const [quizResponse, questionsResponse] = await Promise.all([
+        guessMeWhatAxios.get(`/quiz/${code}`),
+        guessMeWhatAxios.get(`/quiz/${code}/questions`)
+      ]);
+
+      if (quizResponse.data.status === 200 && questionsResponse.data.status === 200) {
+        setQuizCode(code);
+        setQuizInfo(quizResponse.data.data);
+        setQuizQuestions(questionsResponse.data.data.questions);
+        resetParticipantAnswers();
+        router.push("/quiz/join/ready");
+      } else {
+        alert("유효하지 않은 퀴즈 코드입니다.");
+      }
+    } catch (error) {
+      console.error("퀴즈 정보 가져오기 실패:", error);
+      alert("퀴즈 정보를 가져오는데 실패했습니다. 코드를 다시 확인해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const goToCreate = () => {
@@ -49,11 +76,14 @@ const QuizJoinFindPage = () => {
           value={code}
           onChange={handleCodeChange}
           placeholder="친구로부터 전달받은 코드를 입력해 주세요"
+          disabled={isLoading}
         />
       </Content>
 
       <BottomArea>
-        <TestButton onClick={goToTest}>테스트 하러 가기</TestButton>
+        <TestButton onClick={goToTest} disabled={isLoading}>
+          {isLoading ? "로딩 중..." : "테스트 하러 가기"}
+        </TestButton>
         <CreateLink onClick={goToCreate}>내 퀴즈 만들러 가기</CreateLink>
       </BottomArea>
     </Container>
@@ -145,6 +175,10 @@ const CodeInput = styled.input`
   &::placeholder {
     color: ${GuessMeColor.Gray100};
   }
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
 
 const BottomArea = styled.div`
@@ -161,15 +195,17 @@ const TestButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   margin-bottom: 20px;
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
 
 const CreateLink = styled.button`
-  display: block;
   width: 100%;
-  text-align: center;
   background: none;
   border: none;
-  color: ${GuessMeColor.White};
+  color: ${GuessMeColor.Gray300};
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
