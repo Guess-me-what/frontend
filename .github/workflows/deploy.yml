@@ -26,9 +26,7 @@ jobs:
       - name: Build & Export
         env:
           NODE_ENV: production
-        run: |
-          npm run build
-          npm run export
+        run: npm run build
 
       - name: Prevent Jekyll build
         run: touch out/.nojekyll
